@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>表白墙</title>
+</head>
+<body>
+    <style>
+        *{
+            margin: 0;
+            padding: 0;
+        }
+        .contaion {
+            width: 600px;
+            margin: 0 auto;
+        }
+        h1{
+            text-align: center;
+            padding: 20px 0;
+        }
+        p {
+            text-align: center;
+            font-size: 16px;
+            color: #666;
+            padding: 5px;
+        }
+        .row {
+            padding: 5px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 30px;
+        }
+        .row span {
+            width: 65px;
+            font-size: 14px;
+        }
+        .submit {
+            margin: 100px;
+            width: 200px;
+            height: 30px;
+            background-color: orange;
+            border: none;
+        }
+        .submit:active {
+            background-color: #666;
+        }
+    </style>
+
+    <div class="container">
+        
+        <h1>表白墙</h1>
+        <p>输入后提交，会显示在墙上</p>
+        <div class="row">
+            <span>谁：</span>
+            <input type="text" class="edit">
+        </div>
+        <div class="row">
+            <span>对谁：</span>
+            <input type="text" class="edit">
+        </div>
+        <div class="row">
+            <span>说：</span>
+            <input type="text" class="edit">
+        </div>
+        <div class="row">
+            <input type="button" class="submit" id="button" value="提交">
+        </div>
+        
+        <script src="http://libs.baidu.com/jquery/2.0.0/jquery.min.js"></script>
+
+        <script>
+            button.onclick = function() {
+                let edits = document.querySelectorAll(".edit");
+                let who = edits[0].value;
+                let toWho = edits[1].value;
+                let sayWhat = edits[2].value;
+                if(who == '' || toWho=='' || sayWhat== '') {
+                    return;
+                }
+                let message = (who + "对" + toWho + "说：" + sayWhat);
+                let newDiv = document.createElement("div");
+                newDiv.className = "row";
+                newDiv.innerHTML = (message);
+                let container = document.querySelector(".container");
+                container.appendChild(newDiv);
+                edits[0].value = "";
+                edits[1].value = '';
+                edits[2].value='';
+
+                let body = {
+                    from:who,
+                    to:toWho,
+                    say:sayWhat
+                }
+
+                // 原有的逻辑不变, 下面这里重写来写~
+                // 1. 在页面加载的时候, 去从服务器获取到消息列表, 并显示在网页上. 
+                $.ajax({
+                    method:"post",
+                    url:"message",
+                    contentType:"application/json;charset=utf8",
+                    data:JSON.stringify(body),
+                    success:function(data,status) {
+                        console.log(data);
+                    }
+                });
+                
+            }
+
+            function load() {
+                $.ajax({
+                    method:"get",
+                    url:"message",
+                    success:function(data,status) {
+                        let container = document.querySelector(".container");
+                        
+                        //此处的data如果Content-Type 是 application/json 的时候，data的格式就为json格（[{},{},{}]）式
+                        for(let message of data) {
+                            let row = document.createElement("div");
+                            row.className = "row"
+                            row.innerHTML=message.from + "对" + message.to + "说：" + message.say;
+                            console.log("message");
+                            container.appendChild(row);
+                        }
+                        
+                    }
+                });
+                
+            }
+            load();
+
+        
+        
+        
+        </script>
+    </div>
+</body>
+</html>
